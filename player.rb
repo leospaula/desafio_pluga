@@ -5,41 +5,56 @@ class Player
     @symbol = symbol
   end
 
-  def move(board, position, engine)
-    board.positions_with_values[position] = self.symbol
+end
+
+class HumanPlayer < Player
+
+  def move(engine, board, position)
+    board.positions[position.to_i] = self.symbol
     board.display
     winner = engine.check_winner(board)
     if winner != "None"
-      engine.show_winner(self.symbol)
+      engine.show_winner(self.symbol, self.type)
     end
   end
 
-  def best_move(board, engine)
+  def type
+    "Human"
+  end
+
+end
+
+class BotPlayer < Player
+
+  def move(engine, board, position=nil)
     puts ""
-    puts "Robot (O player) is taking turn..."
+    puts "Bot #{self.symbol} is taking turn..."
 
     sleep 2
 
     position = check_priority(board)
 
-    board.positions_with_values[position] = "O"
+    board.positions[position.to_i] = self.symbol
 
     winner = engine.check_winner(board)
 
     if winner != "None"
       puts ""
       board.display
-      engine.show_winner(self.symbol)
+      engine.show_winner(self.symbol, self.type)
     end
 
     puts ""
     board.display
   end
 
+  def type
+    "Bot"
+  end
+
   private
 
   def check_priority(board)
-    flag = true
 
     x_symbol = "X"
     o_symbol = "O"
@@ -56,14 +71,17 @@ class Player
       return x_position
     end
 
-    while flag do
-      random_position = 1 + rand(8)
-      if board.positions[random_position] != "X" and board.positions[random_position] != "O"
-        board.positions[random_position] = "O"
-        return random_position
-        flag false
+    available_spaces = []
+    board.positions.each do |position, value|
+      if value != "X" && value != "O"
+        available_spaces << position
       end
     end
+
+    random_position = available_spaces.sample
+    board.positions[random_position] = self.symbol
+
+    return random_position
   end
 
   def position_priority(board, symbol)
@@ -79,5 +97,5 @@ class Player
     end
     return nil
   end
-
+  
 end
